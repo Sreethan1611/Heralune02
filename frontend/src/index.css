@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-navy: #0B1021;
+  --color-primary-midnight: #1B2444;
+  --color-accent-purple: #8B5CF6;
+  --color-accent-cyan: #06B6D4;
+}
+
+@layer base {
+  :root {
+    --background: var(--color-primary-navy);
+    --foreground: #f8fafc;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Deep Mesh Gradient Background */
+  .mesh-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    background-color: var(--color-primary-navy);
+    background-image: 
+      radial-gradient(at 20% 0%, rgba(139, 92, 246, 0.15) 0, transparent 50%), 
+      radial-gradient(at 80% 0%, rgba(6, 182, 212, 0.1) 0, transparent 50%), 
+      radial-gradient(at 50% 100%, rgba(27, 36, 68, 0.8) 0, transparent 50%);
+    animation: slowDrift 20s ease-in-out infinite alternate;
+  }
+
+  @keyframes slowDrift {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.1); }
+  }
+}
