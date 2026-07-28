@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react';
 import { GlassCard } from '../components/ui/GlassCard';
 import { GlassButton } from '../components/ui/GlassButton';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Activity, MessageSquare, Target, Bell, TrendingUp, Settings, Wand2, Bot } from 'lucide-react';
+import { Sparkles, Activity, MessageSquare, Target, Bell, TrendingUp, Settings, Wand2, Bot, Plus, Check, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { CalendarModal } from '../components/ui/CalendarModal';
 import { InsightsChatModal } from '../components/ui/InsightsChatModal';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -30,6 +31,47 @@ export default function Dashboard() {
   const handleSurpriseMe = () => {
     const randomPrompt = GUIDED_PROMPTS[Math.floor(Math.random() * GUIDED_PROMPTS.length)];
     setJournalPlaceholder(randomPrompt);
+  };
+
+  const MOOD_DATA = [
+    { day: 'Mon', mood: 3, snippet: 'Felt a bit tired but got things done.' },
+    { day: 'Tue', mood: 4, snippet: 'Great morning run, feeling energized!' },
+    { day: 'Wed', mood: 2, snippet: 'Stressed about the upcoming deadline.' },
+    { day: 'Thu', mood: 5, snippet: 'Had a wonderful dinner with friends.' },
+    { day: 'Fri', mood: 4, snippet: 'Looking forward to the weekend.' },
+    { day: 'Sat', mood: 5, snippet: 'Relaxing day at the park.' },
+    { day: 'Sun', mood: 4, snippet: 'Prepped for the week, feeling calm.' }
+  ];
+
+  const [focusTasks, setFocusTasks] = useState([
+    { id: 1, text: 'Practice 5-minute mindfulness', completed: false },
+    { id: 2, text: 'Log evening gratitude', completed: false }
+  ]);
+
+  const [isAddingReminder, setIsAddingReminder] = useState(false);
+  const [newReminderName, setNewReminderName] = useState('');
+  const [newReminderTime, setNewReminderTime] = useState('');
+  const [reminders, setReminders] = useState([
+    { id: 1, name: 'Evening Check-in', time: '8:30 PM' }
+  ]);
+
+  const handleAddReminder = () => {
+    if (newReminderName && newReminderTime) {
+      // Convert 24h time to 12h for display
+      const [hour, min] = newReminderTime.split(':');
+      const h = parseInt(hour, 10);
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      const formattedTime = `${h % 12 || 12}:${min} ${ampm}`;
+      
+      setReminders([...reminders, { id: Date.now(), name: newReminderName, time: formattedTime }]);
+      setNewReminderName('');
+      setNewReminderTime('');
+      setIsAddingReminder(false);
+    }
+  };
+
+  const toggleFocusTask = (id: number) => {
+    setFocusTasks(tasks => tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
   };
 
   useEffect(() => {
@@ -247,8 +289,41 @@ export default function Dashboard() {
           {/* Mood Graph Placeholder */}
           <GlassCard className="p-6">
             <h3 className="text-white font-semibold mb-4">Weekly Mood</h3>
-            <div className="h-40 w-full bg-black/20 rounded-lg flex items-center justify-center border border-white/5">
-              <p className="text-white/30 text-sm">Chart Data (Phase 6)</p>
+            <div className="h-48 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={MOOD_DATA} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="moodGradient" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor="var(--color-accent-cyan)" />
+                      <stop offset="100%" stopColor="var(--color-accent-purple)" />
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 12 }} />
+                  <YAxis domain={[1, 5]} hide={true} />
+                  <Tooltip 
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        return (
+                          <div className="bg-[#1a1a2e] border border-white/10 p-3 rounded-lg shadow-xl max-w-[200px]">
+                            <p className="text-white font-medium mb-1">Mood: {payload[0].value}/5</p>
+                            <p className="text-white/60 text-xs italic leading-relaxed">"{payload[0].payload.snippet}"</p>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                    cursor={{ stroke: 'rgba(255,255,255,0.1)' }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="mood" 
+                    stroke="url(#moodGradient)" 
+                    strokeWidth={3}
+                    dot={{ fill: '#1a1a2e', stroke: 'var(--color-accent-cyan)', strokeWidth: 2, r: 4 }}
+                    activeDot={{ fill: 'var(--color-accent-cyan)', stroke: '#fff', strokeWidth: 2, r: 6 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
             </div>
           </GlassCard>
 
@@ -258,28 +333,86 @@ export default function Dashboard() {
               <Target size={20} />
               <h3 className="text-white font-semibold">Focus Areas</h3>
             </div>
-            <ul className="flex flex-col gap-3">
-              <li className="flex items-center gap-3 text-white/80 text-sm">
-                <div className="w-2 h-2 rounded-full bg-[var(--color-accent-cyan)]"></div>
-                Practice 5-minute mindfulness
-              </li>
-              <li className="flex items-center gap-3 text-white/80 text-sm">
-                <div className="w-2 h-2 rounded-full bg-[var(--color-accent-purple)]"></div>
-                Log evening gratitude
-              </li>
-            </ul>
+            <div className="flex flex-col gap-3">
+              {focusTasks.map(task => (
+                <div 
+                  key={task.id} 
+                  className="flex items-center gap-3 cursor-pointer group"
+                  onClick={() => toggleFocusTask(task.id)}
+                >
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-300 flex-shrink-0 ${
+                    task.completed 
+                      ? 'bg-[var(--color-accent-purple)] border-[var(--color-accent-purple)] scale-110' 
+                      : 'border-white/30 group-hover:border-[var(--color-accent-cyan)]'
+                  }`}>
+                    {task.completed && <Check size={12} className="text-white" />}
+                  </div>
+                  <span className={`text-sm transition-all duration-300 ${
+                    task.completed ? 'text-white/30 line-through' : 'text-white/80'
+                  }`}>
+                    {task.text}
+                  </span>
+                </div>
+              ))}
+            </div>
           </GlassCard>
 
           {/* Reminders */}
           <GlassCard className="p-6">
-            <div className="flex items-center gap-3 mb-4 text-pink-400">
-              <Bell size={20} />
-              <h3 className="text-white font-semibold">Reminders</h3>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3 text-pink-400">
+                <Bell size={20} />
+                <h3 className="text-white font-semibold">Reminders</h3>
+              </div>
+              <button 
+                onClick={() => setIsAddingReminder(!isAddingReminder)}
+                className="text-white/50 hover:text-white transition-colors"
+              >
+                {isAddingReminder ? <X size={18} /> : <Plus size={18} />}
+              </button>
             </div>
-            <div className="p-3 bg-black/20 rounded-lg border border-white/5">
-              <p className="text-white/80 text-sm font-medium mb-1">Evening Check-in</p>
-              <p className="text-white/50 text-xs">Scheduled for 8:30 PM</p>
+            
+            <div className="flex flex-col gap-3">
+              {reminders.map(reminder => (
+                <div key={reminder.id} className="p-3 bg-black/20 rounded-lg border border-white/5 flex items-center justify-between">
+                  <p className="text-white/80 text-sm font-medium">{reminder.name}</p>
+                  <span className="px-2 py-1 bg-white/5 rounded text-xs text-[var(--color-accent-cyan)] border border-white/10">{reminder.time}</span>
+                </div>
+              ))}
             </div>
+
+            {isAddingReminder && (
+              <div className="mt-4 p-4 bg-black/20 border border-white/10 rounded-xl flex flex-col gap-3 animate-in fade-in slide-in-from-top-2">
+                <input 
+                  type="text" 
+                  placeholder="Reminder Name" 
+                  value={newReminderName}
+                  onChange={(e) => setNewReminderName(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-lg py-2 px-3 text-white text-sm outline-none focus:border-[var(--color-accent-purple)]"
+                />
+                <input 
+                  type="time" 
+                  value={newReminderTime}
+                  onChange={(e) => setNewReminderTime(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-lg py-2 px-3 text-white text-sm outline-none focus:border-[var(--color-accent-purple)]"
+                />
+                <div className="flex justify-end gap-2 mt-2">
+                  <button 
+                    onClick={() => setIsAddingReminder(false)}
+                    className="px-3 py-1.5 text-xs text-white/50 hover:text-white transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    onClick={handleAddReminder}
+                    disabled={!newReminderName || !newReminderTime}
+                    className="px-3 py-1.5 text-xs bg-[var(--color-accent-purple)]/20 text-[var(--color-accent-purple)] hover:bg-[var(--color-accent-purple)] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
+                  >
+                    Save
+                  </button>
+                </div>
+              </div>
+            )}
           </GlassCard>
 
         </div>
