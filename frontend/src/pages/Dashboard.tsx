@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react';
 import { GlassCard } from '../components/ui/GlassCard';
 import { GlassButton } from '../components/ui/GlassButton';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Activity, MessageSquare, Target, Bell, TrendingUp, Settings } from 'lucide-react';
+import { Sparkles, Activity, MessageSquare, Target, Bell, TrendingUp, Settings, Wand2, Bot } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { CalendarModal } from '../components/ui/CalendarModal';
+import { InsightsChatModal } from '../components/ui/InsightsChatModal';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -13,7 +14,23 @@ export default function Dashboard() {
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [isInsightsChatOpen, setIsInsightsChatOpen] = useState(false);
+  const [selectedMood, setSelectedMood] = useState<string | null>(null);
+  const [journalPlaceholder, setJournalPlaceholder] = useState("What's on your mind right now?");
   const STREAK_COUNT = 12;
+
+  const GUIDED_PROMPTS = [
+    "What made you smile today?",
+    "What is one thing you can control right now?",
+    "Describe a moment of peace you experienced recently.",
+    "What are you looking forward to this week?",
+    "Write about a small win you had today."
+  ];
+
+  const handleSurpriseMe = () => {
+    const randomPrompt = GUIDED_PROMPTS[Math.floor(Math.random() * GUIDED_PROMPTS.length)];
+    setJournalPlaceholder(randomPrompt);
+  };
 
   useEffect(() => {
     // Check if user is authenticated
@@ -43,6 +60,10 @@ export default function Dashboard() {
         isOpen={isCalendarOpen} 
         onClose={() => setIsCalendarOpen(false)} 
         streakCount={STREAK_COUNT}
+      />
+      <InsightsChatModal 
+        isOpen={isInsightsChatOpen} 
+        onClose={() => setIsInsightsChatOpen(false)} 
       />
 
       {/* Header */}
@@ -100,13 +121,36 @@ export default function Dashboard() {
             <h1 className="text-3xl font-bold text-white mb-2">Good afternoon.</h1>
             <p className="text-white/70 mb-6">Take a moment to reflect on your day.</p>
             
+            <div className="flex gap-4 mb-4">
+              {['😭', '😔', '😐', '🙂', '😄'].map((emoji, index) => (
+                <button
+                  key={index}
+                  onClick={() => setSelectedMood(emoji)}
+                  className={`text-2xl transition-all duration-300 hover:scale-110 ${
+                    selectedMood === emoji 
+                      ? 'scale-125 drop-shadow-[0_0_12px_rgba(255,255,255,0.8)] filter grayscale-0' 
+                      : 'opacity-50 hover:opacity-100 grayscale'
+                  }`}
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+
             <div className="flex gap-4">
               <input 
                 type="text" 
-                placeholder="What's on your mind right now?"
+                placeholder={journalPlaceholder}
                 className="flex-grow bg-black/20 border border-white/10 rounded-xl py-4 px-6 text-white placeholder-white/50 outline-none focus:border-[var(--color-accent-cyan)] transition-colors"
                 onClick={() => navigate('/chat')}
               />
+              <button 
+                onClick={handleSurpriseMe}
+                className="px-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[var(--color-accent-purple)] transition-colors flex items-center justify-center"
+                title="Surprise me with a prompt"
+              >
+                <Wand2 size={24} />
+              </button>
               <GlassButton onClick={() => navigate('/chat')} className="px-8">
                 Journal
               </GlassButton>
@@ -125,14 +169,31 @@ export default function Dashboard() {
               </p>
             </GlassCard>
 
-            <GlassCard className="p-6">
-              <div className="flex items-center gap-3 mb-4 text-[var(--color-accent-cyan)]">
-                <TrendingUp size={24} />
-                <h3 className="text-lg font-semibold text-white">AI Insights</h3>
+            <GlassCard className="p-6 relative">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3 text-[var(--color-accent-cyan)]">
+                  <TrendingUp size={24} />
+                  <h3 className="text-lg font-semibold text-white">AI Insights</h3>
+                </div>
+                <button 
+                  onClick={() => {
+                    console.log('Discuss with AI clicked');
+                    setIsInsightsChatOpen(true);
+                  }}
+                  className="flex items-center gap-2 text-xs text-white/50 hover:text-white transition-colors bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-full border border-white/5"
+                >
+                  <Bot size={14} /> Discuss
+                </button>
               </div>
-              <p className="text-white/80 leading-relaxed font-light">
+              <p className="text-white/80 leading-relaxed font-light mb-4">
                 We've noticed that journaling after 8 PM correlates with a 30% increase in your reported sleep quality.
               </p>
+              <button 
+                onClick={() => console.log('Added to focus areas')}
+                className="text-xs font-medium text-[var(--color-accent-cyan)] hover:text-white transition-colors flex items-center gap-1"
+              >
+                + Add to Focus Areas
+              </button>
             </GlassCard>
           </div>
 
