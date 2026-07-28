@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  :root {
+    --background: #0f172a; /* Fallback */
+    --foreground: #f8fafc;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-sans);
+    overflow: hidden;
+  }
+
+  /* Global Mesh Gradient Background */
+  .mesh-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    background-color: #3b2c5e;
+    background-image: 
+      radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+      radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+      radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%), 
+      radial-gradient(at 0% 100%, hsla(285,100%,21%,1) 0, transparent 50%), 
+      radial-gradient(at 50% 100%, hsla(216,100%,16%,1) 0, transparent 50%), 
+      radial-gradient(at 100% 100%, hsla(263,48%,25%,1) 0, transparent 50%);
+    animation: shift 15s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes shift {
+  0% {
+    background-position: 0% 0%;
+    transform: scale(1);
+  }
+  100% {
+    background-position: 100% 100%;
+    transform: scale(1.1);
+  }
+}
