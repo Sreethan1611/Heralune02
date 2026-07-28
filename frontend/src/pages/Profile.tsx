@@ -7,6 +7,8 @@ import { supabase } from '../lib/supabase';
 
 type Tab = 'account' | 'notifications' | 'privacy' | 'appearance';
 
+const AVATAR_SEEDS = ['heralune', 'explorer', 'dreamer', 'creator', 'thinker', 'seeker', 'guide', 'star'];
+
 export default function Profile() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>('account');
@@ -22,6 +24,8 @@ export default function Profile() {
   const [aiAnalysis, setAiAnalysis] = useState(true);
   const [reduceMotion, setReduceMotion] = useState(false);
   const [theme, setTheme] = useState('dark');
+  const [optOut, setOptOut] = useState(false);
+  const [useRegisteredEmail, setUseRegisteredEmail] = useState(true);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -40,6 +44,8 @@ export default function Profile() {
           setAiAnalysis(meta.preferences.aiAnalysis ?? true);
           setReduceMotion(meta.preferences.reduceMotion ?? false);
           setTheme(meta.preferences.theme ?? 'dark');
+          setOptOut(meta.preferences.optOut ?? false);
+          setUseRegisteredEmail(meta.preferences.useRegisteredEmail ?? true);
         }
       }
     };
@@ -50,7 +56,7 @@ export default function Profile() {
     setLoading(true);
     setMessage('');
     try {
-      const preferences = { dailyReminder, reminderTime, aiAnalysis, reduceMotion, theme };
+      const preferences = { dailyReminder, reminderTime, aiAnalysis, reduceMotion, theme, optOut, useRegisteredEmail };
       const { error } = await supabase.auth.updateUser({
         data: { nickname, avatarSeed, preferences }
       });
@@ -64,7 +70,6 @@ export default function Profile() {
     }
   };
 
-  const generateNewAvatar = () => setAvatarSeed(Math.random().toString(36).substring(7));
   const handleDeleteAccount = () => alert("Account deletion is protected. Please contact support.");
 
   const renderTabButton = (tabId: Tab, icon: any, label: string) => {
@@ -117,14 +122,24 @@ export default function Profile() {
               <>
                 <h3 className="text-xl font-bold text-white mb-6">Account Details</h3>
                 <div className="flex flex-col gap-6">
-                  <div className="flex items-center gap-6">
-                    <img 
-                      src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${avatarSeed}`} 
-                      alt="Profile" 
-                      className="w-20 h-20 rounded-full border-2 border-[var(--color-accent-purple)] bg-black/20"
-                    />
-                    <GlassButton variant="secondary" onClick={generateNewAvatar}>Change Avatar</GlassButton>
+                  
+                  <div className="flex flex-col gap-4">
+                    <label className="block text-white/70 text-sm">Choose Avatar</label>
+                    <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar">
+                      {AVATAR_SEEDS.map((seed) => (
+                        <img 
+                          key={seed}
+                          src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`} 
+                          alt={seed}
+                          onClick={() => setAvatarSeed(seed)}
+                          className={`w-16 h-16 rounded-full border-2 bg-black/20 cursor-pointer transition-all flex-shrink-0 ${
+                            avatarSeed === seed ? 'border-[var(--color-accent-purple)] scale-110' : 'border-white/10 hover:border-white/30'
+                          }`}
+                        />
+                      ))}
+                    </div>
                   </div>
+
                   <div>
                     <label className="block text-white/70 text-sm mb-2">Email Address</label>
                     <input type="email" value={email} disabled className="w-full bg-black/20 border border-white/10 rounded-xl py-3 px-4 text-white/50 outline-none cursor-not-allowed" />
@@ -141,18 +156,39 @@ export default function Profile() {
               <>
                 <h3 className="text-xl font-bold text-white mb-6">Notification Preferences</h3>
                 <div className="flex flex-col gap-6">
-                  <div className="flex items-center justify-between">
+                  
+                  <div className="flex items-center justify-between p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
                     <div>
-                      <h4 className="text-white font-medium">Daily Journal Reminder</h4>
-                      <p className="text-white/50 text-sm">Receive a push notification to reflect.</p>
+                      <h4 className="text-red-400 font-medium">Opt-out of all notifications</h4>
+                      <p className="text-red-400/70 text-sm">You will not receive any reminders or emails.</p>
                     </div>
-                    <input type="checkbox" checked={dailyReminder} onChange={(e) => setDailyReminder(e.target.checked)} className="w-5 h-5 accent-[var(--color-accent-cyan)] cursor-pointer" />
+                    <input type="checkbox" checked={optOut} onChange={(e) => setOptOut(e.target.checked)} className="w-5 h-5 accent-red-500 cursor-pointer" />
                   </div>
-                  {dailyReminder && (
-                    <div>
-                      <label className="block text-white/70 text-sm mb-2">Reminder Time</label>
-                      <input type="time" value={reminderTime} onChange={(e) => setReminderTime(e.target.value)} className="w-full sm:w-auto bg-black/20 border border-white/10 rounded-xl py-2 px-4 text-white outline-none cursor-pointer" />
-                    </div>
+
+                  {!optOut && (
+                    <>
+                      <div className="flex items-center justify-between mt-4">
+                        <div>
+                          <h4 className="text-white font-medium">Use Registered Email</h4>
+                          <p className="text-white/50 text-sm">Send notifications to {email}</p>
+                        </div>
+                        <input type="checkbox" checked={useRegisteredEmail} onChange={(e) => setUseRegisteredEmail(e.target.checked)} className="w-5 h-5 accent-[var(--color-accent-cyan)] cursor-pointer" />
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="text-white font-medium">Daily Journal Reminder</h4>
+                          <p className="text-white/50 text-sm">Receive a push notification to reflect.</p>
+                        </div>
+                        <input type="checkbox" checked={dailyReminder} onChange={(e) => setDailyReminder(e.target.checked)} className="w-5 h-5 accent-[var(--color-accent-cyan)] cursor-pointer" />
+                      </div>
+                      {dailyReminder && (
+                        <div>
+                          <label className="block text-white/70 text-sm mb-2">Reminder Time</label>
+                          <input type="time" value={reminderTime} onChange={(e) => setReminderTime(e.target.value)} className="w-full sm:w-auto bg-black/20 border border-white/10 rounded-xl py-2 px-4 text-white outline-none cursor-pointer" />
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               </>

@@ -10,6 +10,8 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [avatarSeed, setAvatarSeed] = useState('heralune');
 
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
   useEffect(() => {
     // Check if user is authenticated
     const checkAuth = async () => {
@@ -44,19 +46,31 @@ export default function Dashboard() {
         <div className="hidden md:flex items-center gap-8 bg-black/20 px-6 py-2 rounded-full border border-white/5 backdrop-blur-md">
           <button className="text-white font-medium hover:text-[var(--color-accent-cyan)] transition-colors" onClick={() => navigate('/dashboard')}>Home</button>
           <button className="text-white/60 font-medium hover:text-[var(--color-accent-cyan)] transition-colors" onClick={() => navigate('/analytics')}>Analytics</button>
-          <button className="text-white/60 font-medium hover:text-[var(--color-accent-cyan)] transition-colors" onClick={() => navigate('/profile')}>Profile</button>
         </div>
 
-        <div className="flex items-center gap-4">
-          <GlassButton variant="ghost" onClick={handleLogout} className="!p-2 text-white/60 hover:text-white" title="Logout">
-            <LogOut size={20} />
-          </GlassButton>
+        <div className="relative">
           <img 
             src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${avatarSeed}`} 
             alt="Profile" 
-            className="w-10 h-10 rounded-full border border-white/20 bg-black/20 cursor-pointer"
-            onClick={() => navigate('/profile')}
+            className="w-10 h-10 rounded-full border border-white/20 bg-black/20 cursor-pointer hover:border-white/40 transition-colors"
+            onClick={() => setDropdownOpen(!dropdownOpen)}
           />
+          {dropdownOpen && (
+            <div className="absolute right-0 mt-2 w-48 bg-[#1a1a2e] border border-white/10 rounded-xl shadow-xl overflow-hidden z-50">
+              <button 
+                className="w-full text-left px-4 py-3 text-white/80 hover:text-white hover:bg-white/5 transition-colors"
+                onClick={() => navigate('/profile')}
+              >
+                Profile & Settings
+              </button>
+              <button 
+                className="w-full text-left px-4 py-3 text-red-400 hover:text-red-300 hover:bg-white/5 transition-colors border-t border-white/5"
+                onClick={handleLogout}
+              >
+                Sign Out
+              </button>
+            </div>
+          )}
         </div>
       </header>
 
