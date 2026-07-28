@@ -5,13 +5,23 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Settings, User, Bell, Shield, Moon } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
+type Tab = 'account' | 'notifications' | 'privacy' | 'appearance';
+
 export default function Profile() {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<Tab>('account');
   const [email, setEmail] = useState('');
   const [nickname, setNickname] = useState('');
   const [avatarSeed, setAvatarSeed] = useState('heralune');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+
+  // Preferences State
+  const [dailyReminder, setDailyReminder] = useState(true);
+  const [reminderTime, setReminderTime] = useState('20:00');
+  const [aiAnalysis, setAiAnalysis] = useState(true);
+  const [reduceMotion, setReduceMotion] = useState(false);
+  const [theme, setTheme] = useState('dark');
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -20,8 +30,17 @@ export default function Profile() {
         navigate('/auth');
       } else {
         setEmail(session.user.email || '');
-        setNickname(session.user.user_metadata?.nickname || '');
-        setAvatarSeed(session.user.user_metadata?.avatarSeed || session.user.id || 'heralune');
+        const meta = session.user.user_metadata;
+        setNickname(meta?.nickname || '');
+        setAvatarSeed(meta?.avatarSeed || session.user.id || 'heralune');
+        
+        if (meta?.preferences) {
+          setDailyReminder(meta.preferences.dailyReminder ?? true);
+          setReminderTime(meta.preferences.reminderTime ?? '20:00');
+          setAiAnalysis(meta.preferences.aiAnalysis ?? true);
+          setReduceMotion(meta.preferences.reduceMotion ?? false);
+          setTheme(meta.preferences.theme ?? 'dark');
+        }
       }
     };
     fetchUser();
@@ -31,24 +50,33 @@ export default function Profile() {
     setLoading(true);
     setMessage('');
     try {
+      const preferences = { dailyReminder, reminderTime, aiAnalysis, reduceMotion, theme };
       const { error } = await supabase.auth.updateUser({
-        data: { nickname, avatarSeed }
+        data: { nickname, avatarSeed, preferences }
       });
       if (error) throw error;
-      setMessage('Profile updated successfully!');
+      setMessage('Settings updated successfully!');
+      setTimeout(() => setMessage(''), 3000);
     } catch (err: any) {
-      setMessage('Error updating profile: ' + err.message);
+      setMessage('Error updating settings: ' + err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const generateNewAvatar = () => {
-    setAvatarSeed(Math.random().toString(36).substring(7));
-  };
+  const generateNewAvatar = () => setAvatarSeed(Math.random().toString(36).substring(7));
+  const handleDeleteAccount = () => alert("Account deletion is protected. Please contact support.");
 
-  const handleDeleteAccount = () => {
-    alert("Account deletion is protected. Please contact support to permanently remove your data.");
+  const renderTabButton = (tabId: Tab, icon: any, label: string) => {
+    const isActive = activeTab === tabId;
+    return (
+      <button 
+        onClick={() => setActiveTab(tabId)}
+        className={`flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${isActive ? 'text-white bg-white/10' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
+      >
+        {icon} {label}
+      </button>
+    );
   };
 
   return (
@@ -72,78 +100,120 @@ export default function Profile() {
         {/* Sidebar */}
         <div className="md:col-span-1 flex flex-col gap-4">
           <GlassCard className="p-4 flex flex-col gap-2">
-            <button className="flex items-center gap-3 text-white bg-white/10 p-3 rounded-lg text-left">
-              <User size={18} /> Account
-            </button>
-            <button className="flex items-center gap-3 text-white/60 hover:text-white hover:bg-white/5 p-3 rounded-lg text-left transition-colors">
-              <Bell size={18} /> Notifications
-            </button>
-            <button className="flex items-center gap-3 text-white/60 hover:text-white hover:bg-white/5 p-3 rounded-lg text-left transition-colors">
-              <Shield size={18} /> Privacy
-            </button>
-            <button className="flex items-center gap-3 text-white/60 hover:text-white hover:bg-white/5 p-3 rounded-lg text-left transition-colors">
-              <Moon size={18} /> Appearance
-            </button>
+            {renderTabButton('account', <User size={18} />, 'Account')}
+            {renderTabButton('notifications', <Bell size={18} />, 'Notifications')}
+            {renderTabButton('privacy', <Shield size={18} />, 'Privacy')}
+            {renderTabButton('appearance', <Moon size={18} />, 'Appearance')}
           </GlassCard>
         </div>
 
         {/* Main Content */}
         <div className="md:col-span-2 flex flex-col gap-6">
           <GlassCard className="p-8" intensity="heavy">
-            <h3 className="text-xl font-bold text-white mb-6">Account Details</h3>
             
-            {message && <div className="mb-4 p-3 bg-white/10 rounded-lg text-white text-sm">{message}</div>}
+            {message && <div className="mb-6 p-3 bg-white/10 rounded-lg text-white text-sm border border-white/10">{message}</div>}
 
-            <div className="flex flex-col gap-6">
-              <div className="flex items-center gap-6">
-                <img 
-                  src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${avatarSeed}`} 
-                  alt="Profile" 
-                  className="w-20 h-20 rounded-full border-2 border-[var(--color-accent-purple)] bg-black/20"
-                />
-                <div>
-                  <GlassButton variant="secondary" onClick={generateNewAvatar}>Change Avatar</GlassButton>
+            {activeTab === 'account' && (
+              <>
+                <h3 className="text-xl font-bold text-white mb-6">Account Details</h3>
+                <div className="flex flex-col gap-6">
+                  <div className="flex items-center gap-6">
+                    <img 
+                      src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${avatarSeed}`} 
+                      alt="Profile" 
+                      className="w-20 h-20 rounded-full border-2 border-[var(--color-accent-purple)] bg-black/20"
+                    />
+                    <GlassButton variant="secondary" onClick={generateNewAvatar}>Change Avatar</GlassButton>
+                  </div>
+                  <div>
+                    <label className="block text-white/70 text-sm mb-2">Email Address</label>
+                    <input type="email" value={email} disabled className="w-full bg-black/20 border border-white/10 rounded-xl py-3 px-4 text-white/50 outline-none cursor-not-allowed" />
+                  </div>
+                  <div>
+                    <label className="block text-white/70 text-sm mb-2">Preferred Name / Nickname</label>
+                    <input type="text" value={nickname} onChange={(e) => setNickname(e.target.value)} placeholder="How should Heralune call you?" className="w-full bg-black/20 border border-white/10 rounded-xl py-3 px-4 text-white outline-none focus:border-[var(--color-accent-cyan)] transition-colors" />
+                  </div>
                 </div>
-              </div>
+              </>
+            )}
 
-              <div>
-                <label className="block text-white/70 text-sm mb-2">Email Address</label>
-                <input 
-                  type="email" 
-                  value={email}
-                  disabled
-                  className="w-full bg-black/20 border border-white/10 rounded-xl py-3 px-4 text-white/50 outline-none cursor-not-allowed"
-                />
-              </div>
+            {activeTab === 'notifications' && (
+              <>
+                <h3 className="text-xl font-bold text-white mb-6">Notification Preferences</h3>
+                <div className="flex flex-col gap-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-white font-medium">Daily Journal Reminder</h4>
+                      <p className="text-white/50 text-sm">Receive a push notification to reflect.</p>
+                    </div>
+                    <input type="checkbox" checked={dailyReminder} onChange={(e) => setDailyReminder(e.target.checked)} className="w-5 h-5 accent-[var(--color-accent-cyan)] cursor-pointer" />
+                  </div>
+                  {dailyReminder && (
+                    <div>
+                      <label className="block text-white/70 text-sm mb-2">Reminder Time</label>
+                      <input type="time" value={reminderTime} onChange={(e) => setReminderTime(e.target.value)} className="w-full sm:w-auto bg-black/20 border border-white/10 rounded-xl py-2 px-4 text-white outline-none cursor-pointer" />
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
 
-              <div>
-                <label className="block text-white/70 text-sm mb-2">Preferred Name / Nickname</label>
-                <input 
-                  type="text" 
-                  value={nickname}
-                  onChange={(e) => setNickname(e.target.value)}
-                  placeholder="How should Heralune call you?"
-                  className="w-full bg-black/20 border border-white/10 rounded-xl py-3 px-4 text-white outline-none focus:border-[var(--color-accent-cyan)] transition-colors"
-                />
-              </div>
+            {activeTab === 'privacy' && (
+              <>
+                <h3 className="text-xl font-bold text-white mb-6">Privacy & Security</h3>
+                <div className="flex flex-col gap-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-white font-medium">Allow AI Analysis</h4>
+                      <p className="text-white/50 text-sm">Let Gemini analyze entries for Weekly Insights.</p>
+                    </div>
+                    <input type="checkbox" checked={aiAnalysis} onChange={(e) => setAiAnalysis(e.target.checked)} className="w-5 h-5 accent-[var(--color-accent-purple)] cursor-pointer" />
+                  </div>
+                </div>
+              </>
+            )}
 
-              <GlassButton className="w-full sm:w-auto mt-4" onClick={handleSave} disabled={loading}>
-                {loading ? 'Saving...' : 'Save Changes'}
+            {activeTab === 'appearance' && (
+              <>
+                <h3 className="text-xl font-bold text-white mb-6">Appearance</h3>
+                <div className="flex flex-col gap-6">
+                  <div>
+                    <label className="block text-white/70 text-sm mb-2">App Theme</label>
+                    <select value={theme} onChange={(e) => setTheme(e.target.value)} className="w-full bg-black/20 border border-white/10 rounded-xl py-3 px-4 text-white outline-none cursor-pointer">
+                      <option value="dark">Midnight Dark (Default)</option>
+                      <option value="light">Soft Light (Coming Soon)</option>
+                    </select>
+                  </div>
+                  <div className="flex items-center justify-between mt-4">
+                    <div>
+                      <h4 className="text-white font-medium">Reduce Motion</h4>
+                      <p className="text-white/50 text-sm">Disable background mesh and floating animations.</p>
+                    </div>
+                    <input type="checkbox" checked={reduceMotion} onChange={(e) => setReduceMotion(e.target.checked)} className="w-5 h-5 accent-[var(--color-accent-cyan)] cursor-pointer" />
+                  </div>
+                </div>
+              </>
+            )}
+
+            <div className="mt-8 pt-6 border-t border-white/10">
+              <GlassButton className="w-full sm:w-auto" onClick={handleSave} disabled={loading}>
+                {loading ? 'Saving...' : 'Save All Changes'}
               </GlassButton>
             </div>
           </GlassCard>
 
-          <GlassCard className="p-8 border-red-500/30">
-            <h3 className="text-xl font-bold text-red-400 mb-2">Danger Zone</h3>
-            <p className="text-white/60 text-sm mb-6">Permanently delete your account and all journaling data.</p>
-            <GlassButton variant="secondary" onClick={handleDeleteAccount} className="!text-red-400 !border-red-500/30 hover:!bg-red-500/20">
-              Delete Account
-            </GlassButton>
-          </GlassCard>
+          {activeTab === 'privacy' && (
+            <GlassCard className="p-8 border-red-500/30">
+              <h3 className="text-xl font-bold text-red-400 mb-2">Danger Zone</h3>
+              <p className="text-white/60 text-sm mb-6">Permanently delete your account and all journaling data.</p>
+              <GlassButton variant="secondary" onClick={handleDeleteAccount} className="!text-red-400 !border-red-500/30 hover:!bg-red-500/20">
+                Delete Account
+              </GlassButton>
+            </GlassCard>
+          )}
+
         </div>
-
       </div>
-
     </div>
   );
 }
