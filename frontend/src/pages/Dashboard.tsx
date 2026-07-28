@@ -8,6 +8,7 @@ import { supabase } from '../lib/supabase';
 export default function Dashboard() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [avatarSeed, setAvatarSeed] = useState('heralune');
 
   useEffect(() => {
     // Check if user is authenticated
@@ -16,6 +17,7 @@ export default function Dashboard() {
       if (!session) {
         navigate('/auth');
       } else {
+        setAvatarSeed(session.user.user_metadata?.avatarSeed || session.user.id || 'heralune');
         setLoading(false);
       }
     };
@@ -50,7 +52,7 @@ export default function Dashboard() {
             <LogOut size={20} />
           </GlassButton>
           <img 
-            src={`https://api.dicebear.com/7.x/avataaars/svg?seed=heralune`} 
+            src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${avatarSeed}`} 
             alt="Profile" 
             className="w-10 h-10 rounded-full border border-white/20 bg-black/20 cursor-pointer"
             onClick={() => navigate('/profile')}

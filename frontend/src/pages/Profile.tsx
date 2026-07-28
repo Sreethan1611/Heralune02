@@ -8,6 +8,10 @@ import { supabase } from '../lib/supabase';
 export default function Profile() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
+  const [nickname, setNickname] = useState('');
+  const [avatarSeed, setAvatarSeed] = useState('heralune');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -16,10 +20,36 @@ export default function Profile() {
         navigate('/auth');
       } else {
         setEmail(session.user.email || '');
+        setNickname(session.user.user_metadata?.nickname || '');
+        setAvatarSeed(session.user.user_metadata?.avatarSeed || session.user.id || 'heralune');
       }
     };
     fetchUser();
   }, [navigate]);
+
+  const handleSave = async () => {
+    setLoading(true);
+    setMessage('');
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: { nickname, avatarSeed }
+      });
+      if (error) throw error;
+      setMessage('Profile updated successfully!');
+    } catch (err: any) {
+      setMessage('Error updating profile: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const generateNewAvatar = () => {
+    setAvatarSeed(Math.random().toString(36).substring(7));
+  };
+
+  const handleDeleteAccount = () => {
+    alert("Account deletion is protected. Please contact support to permanently remove your data.");
+  };
 
   return (
     <div className="min-h-screen p-4 md:p-8 relative z-10 flex flex-col items-center">
@@ -62,15 +92,17 @@ export default function Profile() {
           <GlassCard className="p-8" intensity="heavy">
             <h3 className="text-xl font-bold text-white mb-6">Account Details</h3>
             
+            {message && <div className="mb-4 p-3 bg-white/10 rounded-lg text-white text-sm">{message}</div>}
+
             <div className="flex flex-col gap-6">
               <div className="flex items-center gap-6">
                 <img 
-                  src={`https://api.dicebear.com/7.x/avataaars/svg?seed=heralune`} 
+                  src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${avatarSeed}`} 
                   alt="Profile" 
-                  className="w-20 h-20 rounded-full border-2 border-white/20 bg-black/20"
+                  className="w-20 h-20 rounded-full border-2 border-[var(--color-accent-purple)] bg-black/20"
                 />
                 <div>
-                  <GlassButton variant="secondary">Change Avatar</GlassButton>
+                  <GlassButton variant="secondary" onClick={generateNewAvatar}>Change Avatar</GlassButton>
                 </div>
               </div>
 
@@ -88,19 +120,23 @@ export default function Profile() {
                 <label className="block text-white/70 text-sm mb-2">Preferred Name / Nickname</label>
                 <input 
                   type="text" 
+                  value={nickname}
+                  onChange={(e) => setNickname(e.target.value)}
                   placeholder="How should Heralune call you?"
-                  className="w-full bg-black/20 border border-white/10 rounded-xl py-3 px-4 text-white outline-none focus:border-[var(--color-accent-cyan)]"
+                  className="w-full bg-black/20 border border-white/10 rounded-xl py-3 px-4 text-white outline-none focus:border-[var(--color-accent-cyan)] transition-colors"
                 />
               </div>
 
-              <GlassButton className="w-full sm:w-auto mt-4">Save Changes</GlassButton>
+              <GlassButton className="w-full sm:w-auto mt-4" onClick={handleSave} disabled={loading}>
+                {loading ? 'Saving...' : 'Save Changes'}
+              </GlassButton>
             </div>
           </GlassCard>
 
           <GlassCard className="p-8 border-red-500/30">
             <h3 className="text-xl font-bold text-red-400 mb-2">Danger Zone</h3>
             <p className="text-white/60 text-sm mb-6">Permanently delete your account and all journaling data.</p>
-            <GlassButton variant="secondary" className="!text-red-400 !border-red-500/30 hover:!bg-red-500/20">
+            <GlassButton variant="secondary" onClick={handleDeleteAccount} className="!text-red-400 !border-red-500/30 hover:!bg-red-500/20">
               Delete Account
             </GlassButton>
           </GlassCard>
