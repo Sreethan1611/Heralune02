@@ -381,7 +381,7 @@ export default function Dashboard() {
           </GlassCard>
 
           {/* Reminders */}
-          <GlassCard className="p-6">
+          <GlassCard className="p-6 !overflow-visible">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3 text-pink-400">
                 <Bell size={20} />
