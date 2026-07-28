@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react';
 import { GlassCard } from '../components/ui/GlassCard';
 import { GlassButton } from '../components/ui/GlassButton';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Activity, MessageSquare, Target, Bell, TrendingUp } from 'lucide-react';
+import { Sparkles, Activity, MessageSquare, Target, Bell, TrendingUp, Settings } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { CalendarModal } from '../components/ui/CalendarModal';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -11,6 +12,8 @@ export default function Dashboard() {
   const [avatarSeed, setAvatarSeed] = useState('heralune');
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const STREAK_COUNT = 12;
 
   useEffect(() => {
     // Check if user is authenticated
@@ -36,6 +39,12 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen p-6 md:p-12 relative z-10 flex flex-col items-center">
       
+      <CalendarModal 
+        isOpen={isCalendarOpen} 
+        onClose={() => setIsCalendarOpen(false)} 
+        streakCount={STREAK_COUNT}
+      />
+
       {/* Header */}
       <header className="w-full max-w-6xl flex justify-between items-center mb-12">
         <div className="text-2xl font-bold tracking-tight text-white flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
@@ -58,10 +67,16 @@ export default function Dashboard() {
           {dropdownOpen && (
             <div className="absolute right-0 mt-2 w-48 bg-[#1a1a2e] border border-white/10 rounded-xl shadow-xl overflow-hidden z-50">
               <button 
-                className="w-full text-left px-4 py-3 text-white/80 hover:text-white hover:bg-white/5 transition-colors"
+                className="w-full text-left px-4 py-3 text-white/80 hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2"
                 onClick={() => navigate('/profile')}
               >
-                Profile & Settings
+                Profile
+              </button>
+              <button 
+                className="w-full text-left px-4 py-3 text-white/80 hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2"
+                onClick={() => navigate('/settings')}
+              >
+                <Settings size={16} className="opacity-70" /> Settings
               </button>
               <button 
                 className="w-full text-left px-4 py-3 text-red-400 hover:text-red-300 hover:bg-white/5 transition-colors border-t border-white/5"
@@ -156,15 +171,17 @@ export default function Dashboard() {
         <div className="md:col-span-4 flex flex-col gap-6">
           
           {/* Streak */}
-          <GlassCard className="p-6 flex items-center justify-between">
-            <div>
-              <h3 className="text-white font-semibold mb-1">Current Streak</h3>
-              <p className="text-white/60 text-sm">Keep it up!</p>
-            </div>
-            <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-accent-purple)] to-[var(--color-accent-cyan)]">
-              12
-            </div>
-          </GlassCard>
+          <div className="cursor-pointer transition-transform hover:scale-[1.02] active:scale-[0.98]" onClick={() => setIsCalendarOpen(true)}>
+            <GlassCard className="p-6 flex items-center justify-between border-[var(--color-accent-purple)]/30 hover:border-[var(--color-accent-cyan)]/50 transition-colors">
+              <div>
+                <h3 className="text-white font-semibold mb-1">Current Streak</h3>
+                <p className="text-[var(--color-accent-cyan)] text-sm font-medium">Click to view calendar</p>
+              </div>
+              <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-accent-purple)] to-[var(--color-accent-cyan)]">
+                {STREAK_COUNT}
+              </div>
+            </GlassCard>
+          </div>
 
           {/* Mood Graph Placeholder */}
           <GlassCard className="p-6">

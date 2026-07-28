@@ -8,6 +8,8 @@ const Chat = React.lazy(() => import('./pages/Chat'));
 const Analytics = React.lazy(() => import('./pages/Analytics'));
 const Profile = React.lazy(() => import('./pages/Profile'));
 
+const Settings = React.lazy(() => import('./pages/Settings'));
+
 function App() {
   return (
     <>
@@ -21,6 +23,7 @@ function App() {
             <Route path="/chat" element={<Chat />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/settings" element={<Settings />} />
           </Routes>
         </Suspense>
       </BrowserRouter>
