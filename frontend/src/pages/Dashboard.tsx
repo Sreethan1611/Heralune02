@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { GlassCard } from '../components/ui/GlassCard';
 import { GlassButton } from '../components/ui/GlassButton';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Activity, BookOpen, MessageSquare, Target, Bell, TrendingUp, LogOut } from 'lucide-react';
+import { Sparkles, Activity, MessageSquare, Target, Bell, TrendingUp, LogOut } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 export default function Dashboard() {

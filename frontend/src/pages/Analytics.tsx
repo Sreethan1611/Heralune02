@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { GlassCard } from '../components/ui/GlassCard';
 import { GlassButton } from '../components/ui/GlassButton';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, ArrowLeft, BarChart2, TrendingUp, Calendar, Heart, Activity } from 'lucide-react';
+import { ArrowLeft, BarChart2, TrendingUp, Calendar, Heart, Activity, Sparkles } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { supabase } from '../lib/supabase';
 

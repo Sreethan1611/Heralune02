@@ -37,20 +37,6 @@ export default function AuthPage() {
     }
   };
 
-  const handleGoogleLogin = async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/dashboard`
-        }
-      });
-      if (error) throw error;
-    } catch (err: any) {
-      setError(err.message || 'Google login failed.');
-    }
-  };
-
   return (
     <div className="min-h-screen relative flex items-center justify-center p-6">
       <div className="absolute top-6 left-6 cursor-pointer flex items-center gap-2 text-white font-bold text-xl z-10" onClick={() => navigate('/')}>
