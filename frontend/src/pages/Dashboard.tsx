@@ -6,6 +6,7 @@ import { Sparkles, Activity, MessageSquare, Target, Bell, TrendingUp, Settings, 
 import { supabase } from '../lib/supabase';
 import { CalendarModal } from '../components/ui/CalendarModal';
 import { InsightsChatModal } from '../components/ui/InsightsChatModal';
+import { TimePicker } from '../components/ui/TimePicker';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function Dashboard() {
@@ -429,11 +430,9 @@ export default function Dashboard() {
                 
                 <div>
                   <label className="block text-white/60 text-xs mb-1.5">Time</label>
-                  <input 
-                    type="time" 
-                    value={newReminderTime}
-                    onChange={(e) => setNewReminderTime(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg py-2.5 px-3 text-white text-sm outline-none focus:border-[var(--color-accent-purple)] transition-colors [color-scheme:dark]"
+                  <TimePicker 
+                    value={newReminderTime} 
+                    onChange={setNewReminderTime} 
                   />
                 </div>
 
@@ -476,7 +475,7 @@ export default function Dashboard() {
                     disabled={!newReminderName || !newReminderTime || newReminderDays.length === 0}
                     className="px-5 py-2 text-xs font-bold bg-[var(--color-accent-cyan)] text-black hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors shadow-[0_0_15px_rgba(0,255,255,0.3)]"
                   >
-                    Save Alarm
+                    Save Reminder
                   </button>
                 </div>
               </div>
