@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { GlassCard } from '../components/ui/GlassCard';
 import { GlassButton } from '../components/ui/GlassButton';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Activity, MessageSquare, Target, Bell, TrendingUp, Settings, Wand2, Bot, Plus, Check, X } from 'lucide-react';
+import { Sparkles, Activity, MessageSquare, Target, Bell, TrendingUp, Settings, Wand2, Bot, Plus, Check, X, Trash2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { CalendarModal } from '../components/ui/CalendarModal';
 import { InsightsChatModal } from '../components/ui/InsightsChatModal';
@@ -51,8 +51,9 @@ export default function Dashboard() {
   const [isAddingReminder, setIsAddingReminder] = useState(false);
   const [newReminderName, setNewReminderName] = useState('');
   const [newReminderTime, setNewReminderTime] = useState('');
+  const [newReminderDays, setNewReminderDays] = useState<number[]>([0,1,2,3,4,5,6]);
   const [reminders, setReminders] = useState([
-    { id: 1, name: 'Evening Check-in', time: '8:30 PM' }
+    { id: 1, name: 'Evening Check-in', time: '8:30 PM', days: 'Every Day' }
   ]);
 
   const handleAddReminder = () => {
@@ -63,10 +64,31 @@ export default function Dashboard() {
       const ampm = h >= 12 ? 'PM' : 'AM';
       const formattedTime = `${h % 12 || 12}:${min} ${ampm}`;
       
-      setReminders([...reminders, { id: Date.now(), name: newReminderName, time: formattedTime }]);
+      let dayText = 'Every Day';
+      if (newReminderDays.length < 7 && newReminderDays.length > 0) {
+        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        dayText = newReminderDays.map(d => dayNames[d]).join(', ');
+      } else if (newReminderDays.length === 0) {
+        dayText = 'Never';
+      }
+      
+      setReminders([...reminders, { id: Date.now(), name: newReminderName, time: formattedTime, days: dayText }]);
       setNewReminderName('');
       setNewReminderTime('');
+      setNewReminderDays([0,1,2,3,4,5,6]);
       setIsAddingReminder(false);
+    }
+  };
+
+  const handleDeleteReminder = (id: number) => {
+    setReminders(reminders.filter(r => r.id !== id));
+  };
+
+  const toggleReminderDay = (day: number) => {
+    if (newReminderDays.includes(day)) {
+      setNewReminderDays(newReminderDays.filter(d => d !== day));
+    } else {
+      setNewReminderDays([...newReminderDays, day].sort());
     }
   };
 
@@ -374,41 +396,87 @@ export default function Dashboard() {
             
             <div className="flex flex-col gap-3">
               {reminders.map(reminder => (
-                <div key={reminder.id} className="p-3 bg-black/20 rounded-lg border border-white/5 flex items-center justify-between">
-                  <p className="text-white/80 text-sm font-medium">{reminder.name}</p>
-                  <span className="px-2 py-1 bg-white/5 rounded text-xs text-[var(--color-accent-cyan)] border border-white/10">{reminder.time}</span>
+                <div key={reminder.id} className="group p-3 bg-black/20 rounded-lg border border-white/5 flex items-center justify-between transition-colors hover:border-white/20">
+                  <div>
+                    <p className="text-white/80 text-sm font-medium">{reminder.name}</p>
+                    <p className="text-white/40 text-xs mt-0.5">{reminder.days}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="px-2 py-1 bg-white/5 rounded text-xs text-[var(--color-accent-cyan)] border border-white/10">{reminder.time}</span>
+                    <button 
+                      onClick={() => handleDeleteReminder(reminder.id)}
+                      className="opacity-0 group-hover:opacity-100 p-1.5 text-red-400 hover:text-white hover:bg-red-500 rounded-md transition-all border border-transparent hover:border-red-400/50"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
 
             {isAddingReminder && (
-              <div className="mt-4 p-4 bg-black/20 border border-white/10 rounded-xl flex flex-col gap-3 animate-in fade-in slide-in-from-top-2">
-                <input 
-                  type="text" 
-                  placeholder="Reminder Name" 
-                  value={newReminderName}
-                  onChange={(e) => setNewReminderName(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg py-2 px-3 text-white text-sm outline-none focus:border-[var(--color-accent-purple)]"
-                />
-                <input 
-                  type="time" 
-                  value={newReminderTime}
-                  onChange={(e) => setNewReminderTime(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg py-2 px-3 text-white text-sm outline-none focus:border-[var(--color-accent-purple)]"
-                />
-                <div className="flex justify-end gap-2 mt-2">
+              <div className="mt-4 p-4 bg-black/20 border border-white/10 rounded-xl flex flex-col gap-4 animate-in fade-in slide-in-from-top-2 shadow-xl">
+                <div>
+                  <label className="block text-white/60 text-xs mb-1.5">Reminder Name</label>
+                  <input 
+                    type="text" 
+                    placeholder="e.g. Morning Journaling" 
+                    value={newReminderName}
+                    onChange={(e) => setNewReminderName(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-lg py-2.5 px-3 text-white text-sm outline-none focus:border-[var(--color-accent-purple)] transition-colors"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-white/60 text-xs mb-1.5">Time</label>
+                  <input 
+                    type="time" 
+                    value={newReminderTime}
+                    onChange={(e) => setNewReminderTime(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-lg py-2.5 px-3 text-white text-sm outline-none focus:border-[var(--color-accent-purple)] transition-colors [color-scheme:dark]"
+                  />
+                </div>
+
+                <div>
+                  <div className="flex justify-between items-center mb-1.5">
+                    <label className="text-white/60 text-xs">Repeat</label>
+                    <button 
+                      onClick={() => setNewReminderDays(newReminderDays.length === 7 ? [] : [0,1,2,3,4,5,6])}
+                      className="text-[var(--color-accent-cyan)] text-xs font-medium hover:text-white transition-colors"
+                    >
+                      {newReminderDays.length === 7 ? 'Clear All' : 'Every Day'}
+                    </button>
+                  </div>
+                  <div className="flex justify-between gap-1">
+                    {['S','M','T','W','T','F','S'].map((day, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => toggleReminderDay(idx)}
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium transition-all ${
+                          newReminderDays.includes(idx) 
+                            ? 'bg-[var(--color-accent-cyan)]/20 text-[var(--color-accent-cyan)] border border-[var(--color-accent-cyan)]/50' 
+                            : 'bg-white/5 text-white/50 border border-white/10 hover:border-white/30'
+                        }`}
+                      >
+                        {day}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2 mt-2 pt-4 border-t border-white/10">
                   <button 
                     onClick={() => setIsAddingReminder(false)}
-                    className="px-3 py-1.5 text-xs text-white/50 hover:text-white transition-colors"
+                    className="px-4 py-2 text-xs font-medium text-white/60 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
                   >
                     Cancel
                   </button>
                   <button 
                     onClick={handleAddReminder}
-                    disabled={!newReminderName || !newReminderTime}
-                    className="px-3 py-1.5 text-xs bg-[var(--color-accent-purple)]/20 text-[var(--color-accent-purple)] hover:bg-[var(--color-accent-purple)] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
+                    disabled={!newReminderName || !newReminderTime || newReminderDays.length === 0}
+                    className="px-5 py-2 text-xs font-bold bg-[var(--color-accent-cyan)] text-black hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors shadow-[0_0_15px_rgba(0,255,255,0.3)]"
                   >
-                    Save
+                    Save Alarm
                   </button>
                 </div>
               </div>
