@@ -7,8 +7,11 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: "Heralune - AI Journal",
+  title: "Heralune",
   description: "A premium glassmorphic AI journaling experience.",
+  icons: {
+    icon: "/logo.png",
+  },
 };
 
 export default function RootLayout({ children }) {

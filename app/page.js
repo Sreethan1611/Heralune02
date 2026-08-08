@@ -5,6 +5,7 @@ import { useChat } from "@ai-sdk/react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import { Mic, Send, Square } from "lucide-react";
+import Image from "next/image";
 import styles from "./page.module.css";
 
 const springTransition = {
@@ -122,6 +123,10 @@ export default function Home() {
 
   return (
     <div className={styles.layout}>
+      <header className={styles.header}>
+        <Image src="/logo.png" alt="Heralune Logo" width={32} height={32} className={styles.headerLogo} />
+        <h1 className={styles.headerTitle}>Heralune</h1>
+      </header>
       <div className={styles.chatContainer}>
         {messages.length === 0 ? (
           <motion.div 
@@ -130,6 +135,7 @@ export default function Home() {
             animate={{ opacity: 1, scale: 1 }}
             transition={springTransition}
           >
+            <Image src="/logo.png" alt="Heralune Logo" width={120} height={120} priority className={styles.logoLarge} />
             <h1 className={styles.emptyTitle}>Heralune</h1>
             <p>How are you feeling today?</p>
           </motion.div>
