@@ -13,7 +13,7 @@ export default function LandingPage() {
       {/* Navbar placeholder */}
       <nav className="absolute top-0 w-full p-6 flex justify-between items-center max-w-7xl mx-auto">
         <div className="text-2xl font-bold tracking-tight text-white flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-          <img src="/logo.png" alt="Heralune Logo" className="w-8 h-8 object-contain drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]" />
+          <img src="/logo.jpg" alt="Heralune Logo" className="w-8 h-8 object-contain drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]" />
           Heralune
         </div>
         <GlassButton variant="ghost" onClick={() => navigate('/auth')}>Sign In</GlassButton>

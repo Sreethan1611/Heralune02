@@ -160,7 +160,7 @@ export default function Chat() {
               <ArrowLeft size={20} />
             </button>
             <div className="text-xl font-bold text-white flex items-center gap-2 cursor-pointer" onClick={() => navigate('/dashboard')}>
-              <img src="/logo.png" alt="Heralune Logo" className="w-6 h-6 object-contain drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]" />
+              <img src="/logo.jpg" alt="Heralune Logo" className="w-6 h-6 object-contain drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]" />
               Heralune
             </div>
         </div>
@@ -179,7 +179,7 @@ export default function Chat() {
         <div className="flex-grow overflow-y-auto p-6 md:p-8 flex flex-col gap-6">
           {messages.length === 0 ? (
             <div className="text-center mb-12 flex flex-col items-center opacity-50 select-none pointer-events-none">
-              <img src="/logo.png" alt="Heralune Logo" className="w-16 h-16 object-contain drop-shadow-[0_0_12px_rgba(255,255,255,0.2)] mb-4" />
+              <img src="/logo.jpg" alt="Heralune Logo" className="w-16 h-16 object-contain drop-shadow-[0_0_12px_rgba(255,255,255,0.2)] mb-4" />
               <h2 className="text-2xl font-bold text-white mb-2">A Safe Space for Your Thoughts</h2>
               <p className="text-white/80 max-w-md">Type or speak your thoughts. Heralune is here to listen and help you reflect.</p>
             </div>
