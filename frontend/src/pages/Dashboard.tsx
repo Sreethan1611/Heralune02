@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { GlassCard } from '../components/ui/GlassCard';
 import { GlassButton } from '../components/ui/GlassButton';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Activity, MessageSquare, Target, Bell, TrendingUp, Settings, Wand2, Bot, Plus, Check, X, Trash2 } from 'lucide-react';
+import { Activity, MessageSquare, Target, Bell, TrendingUp, Settings, Wand2, Bot, Plus, Check, X, Trash2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { CalendarModal } from '../components/ui/CalendarModal';
 import { InsightsChatModal } from '../components/ui/InsightsChatModal';
@@ -134,7 +134,7 @@ export default function Dashboard() {
       {/* Header */}
       <header className="w-full max-w-6xl flex justify-between items-center mb-12">
         <div className="text-2xl font-bold tracking-tight text-white flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-          <Sparkles className="text-[var(--color-accent-cyan)]" />
+          <img src="/logo.png" alt="Heralune Logo" className="w-8 h-8 object-contain drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]" />
           Heralune
         </div>
         

@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { GlassCard } from '../components/ui/GlassCard';
 import { GlassButton } from '../components/ui/GlassButton';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, ArrowLeft, Mic, Send, Square, History, MoreVertical } from 'lucide-react';
+import { ArrowLeft, Mic, Send, Square, History, MoreVertical } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import { supabase } from '../lib/supabase';
@@ -154,15 +154,15 @@ export default function Chat() {
     <div className="min-h-screen p-4 md:p-8 relative z-10 flex flex-col items-center">
       
       {/* Header */}
-      <header className="w-full max-w-5xl flex justify-between items-center mb-6">
-        <div className="flex items-center gap-4">
-          <GlassButton variant="ghost" onClick={() => navigate('/dashboard')} className="!p-2 text-white/60 hover:text-white">
-            <ArrowLeft size={20} />
-          </GlassButton>
-          <div className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-            <Sparkles className="text-[var(--color-accent-cyan)]" size={20} />
-            Heralune Session
-          </div>
+        <div className="w-full max-w-5xl flex items-center justify-between p-4 border-b border-white/10 bg-black/20 backdrop-blur-md rounded-2xl mb-6">
+          <div className="flex items-center gap-4">
+            <button onClick={() => navigate('/dashboard')} className="p-2 -ml-2 text-white/50 hover:text-white rounded-full hover:bg-white/5 transition-colors">
+              <ArrowLeft size={20} />
+            </button>
+            <div className="text-xl font-bold text-white flex items-center gap-2 cursor-pointer" onClick={() => navigate('/dashboard')}>
+              <img src="/logo.png" alt="Heralune Logo" className="w-6 h-6 object-contain drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]" />
+              Heralune
+            </div>
         </div>
         <div className="flex items-center gap-2">
           <GlassButton variant="ghost" className="!p-2 text-white/60 hover:text-white">
@@ -172,15 +172,15 @@ export default function Chat() {
             <MoreVertical size={20} />
           </GlassButton>
         </div>
-      </header>
+      </div>
 
       {/* Main Chat Area */}
       <GlassCard className="w-full max-w-5xl flex-grow flex flex-col mb-4 overflow-hidden" intensity="heavy">
         <div className="flex-grow overflow-y-auto p-6 md:p-8 flex flex-col gap-6">
           {messages.length === 0 ? (
-            <div className="flex-grow flex flex-col items-center justify-center text-center opacity-70">
-              <Sparkles size={48} className="text-[var(--color-accent-cyan)] mb-4" />
-              <h2 className="text-2xl font-bold text-white mb-2">How are you feeling?</h2>
+            <div className="text-center mb-12 flex flex-col items-center opacity-50 select-none pointer-events-none">
+              <img src="/logo.png" alt="Heralune Logo" className="w-16 h-16 object-contain drop-shadow-[0_0_12px_rgba(255,255,255,0.2)] mb-4" />
+              <h2 className="text-2xl font-bold text-white mb-2">A Safe Space for Your Thoughts</h2>
               <p className="text-white/80 max-w-md">Type or speak your thoughts. Heralune is here to listen and help you reflect.</p>
             </div>
           ) : (

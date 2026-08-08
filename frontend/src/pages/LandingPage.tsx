@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { GlassCard } from '../components/ui/GlassCard';
 import { GlassButton } from '../components/ui/GlassButton';
-import { Sparkles, BrainCircuit, HeartHandshake, ShieldCheck } from 'lucide-react';
+import { BrainCircuit, HeartHandshake, ShieldCheck } from 'lucide-react';
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -12,8 +12,8 @@ export default function LandingPage() {
       
       {/* Navbar placeholder */}
       <nav className="absolute top-0 w-full p-6 flex justify-between items-center max-w-7xl mx-auto">
-        <div className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-          <Sparkles className="text-[var(--color-accent-cyan)]" />
+        <div className="text-2xl font-bold tracking-tight text-white flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
+          <img src="/logo.png" alt="Heralune Logo" className="w-8 h-8 object-contain drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]" />
           Heralune
         </div>
         <GlassButton variant="ghost" onClick={() => navigate('/auth')}>Sign In</GlassButton>

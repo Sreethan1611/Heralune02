@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { GlassCard } from '../components/ui/GlassCard';
 import { GlassButton } from '../components/ui/GlassButton';
-import { Sparkles, Mail, Key, AlertCircle } from 'lucide-react';
+import { Mail, Key, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 
@@ -39,8 +39,10 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen relative flex items-center justify-center p-6">
-      <div className="absolute top-6 left-6 cursor-pointer flex items-center gap-2 text-white font-bold text-xl z-10" onClick={() => navigate('/')}>
-        <Sparkles className="text-[var(--color-accent-cyan)]" /> Heralune
+      <div className="absolute top-0 w-full p-6 flex justify-center items-center">
+        <div className="text-2xl font-bold tracking-tight text-white flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
+          <img src="/logo.png" alt="Heralune Logo" className="w-8 h-8 object-contain drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]" /> Heralune
+        </div>
       </div>
       
       <GlassCard className="w-full max-w-md p-8" intensity="heavy">
