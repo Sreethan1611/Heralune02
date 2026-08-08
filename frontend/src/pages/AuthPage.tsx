@@ -41,7 +41,7 @@ export default function AuthPage() {
     <div className="min-h-screen relative flex items-center justify-center p-6">
       <div className="absolute top-0 w-full p-6 flex justify-center items-center">
         <div className="text-2xl font-bold tracking-tight text-white flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-          <img src="/logo.jpg" alt="Heralune Logo" className="w-8 h-8 object-contain drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]" /> Heralune
+          <img src="/logo.png" alt="Heralune Logo" className="w-8 h-8 object-contain drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]" /> Heralune
         </div>
       </div>
       

@@ -134,7 +134,7 @@ export default function Dashboard() {
       {/* Header */}
       <header className="w-full max-w-6xl flex justify-between items-center mb-12">
         <div className="text-2xl font-bold tracking-tight text-white flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-          <img src="/logo.jpg" alt="Heralune Logo" className="w-8 h-8 object-contain drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]" />
+          <img src="/logo.png" alt="Heralune Logo" className="w-8 h-8 object-contain drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]" />
           Heralune
         </div>
         
