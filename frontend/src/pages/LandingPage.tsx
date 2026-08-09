@@ -86,6 +86,15 @@ export default function LandingPage() {
         </GlassCard>
       </div>
       
+      {/* Footer */}
+      <footer className="w-full max-w-6xl mt-auto pb-8 relative z-20 flex flex-col md:flex-row items-center justify-between text-white/40 text-sm border-t border-white/10 pt-8 px-6">
+        <p>&copy; {new Date().getFullYear()} Heralune. All rights reserved.</p>
+        <div className="flex gap-6 mt-4 md:mt-0">
+          <button onClick={() => navigate('/legal')} className="hover:text-white transition-colors cursor-pointer">
+            Terms & Privacy
+          </button>
+        </div>
+      </footer>
     </div>
   );
 }
