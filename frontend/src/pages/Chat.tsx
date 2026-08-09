@@ -318,25 +318,30 @@ export default function Chat() {
         </div>
 
         {/* Input Area */}
-        <div className="w-full max-w-5xl mx-auto flex-shrink-0">
-          <GlassCard className="p-3 flex items-end gap-3 bg-black/40 border-white/20 shadow-2xl backdrop-blur-xl" intensity="medium">
+        <div className="w-full max-w-4xl mx-auto flex-shrink-0 relative group">
+          {/* Subtle glow behind the input box */}
+          <div className="absolute -inset-1 bg-gradient-to-r from-[var(--color-accent-purple)] to-[var(--color-accent-cyan)] rounded-3xl blur-md opacity-20 group-focus-within:opacity-50 transition duration-500"></div>
+          
+          <div className="relative bg-[#1a1f2c]/80 backdrop-blur-2xl border border-white/10 group-focus-within:border-[var(--color-accent-purple)]/50 rounded-3xl shadow-2xl flex items-end gap-2 p-2 pl-4 transition-all duration-300">
             <textarea
               ref={textareaRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Journal your thoughts... (Shift+Enter for new line)"
-              className="flex-grow bg-transparent border-none text-white resize-none max-h-32 p-3 outline-none placeholder-white/30 text-[15px] leading-relaxed custom-scrollbar"
+              className="flex-grow bg-transparent border-none text-white resize-none max-h-40 py-3 outline-none placeholder-white/30 text-[15px] leading-relaxed custom-scrollbar"
               rows={1}
             />
-            <div className="flex gap-2 p-1 pb-2 shrink-0">
+            
+            {/* Action Buttons */}
+            <div className="flex items-center gap-2 pb-1 shrink-0">
               <button 
                 type="button" 
                 onClick={toggleListening} 
-                className={`p-3 rounded-full transition-all flex items-center justify-center ${
+                className={`p-2.5 rounded-full transition-all flex items-center justify-center ${
                   isListening 
-                    ? 'bg-red-500/20 text-red-400 animate-pulse border border-red-500/30 shadow-[0_0_15px_rgba(239,68,68,0.3)]' 
-                    : 'bg-white/5 text-white/50 hover:text-white hover:bg-white/10 border border-transparent'
+                    ? 'bg-red-500/20 text-red-400 animate-pulse border border-red-500/30' 
+                    : 'text-white/40 hover:text-white hover:bg-white/10 border border-transparent'
                 }`}
                 title="Voice Dictation"
               >
@@ -347,7 +352,7 @@ export default function Chat() {
                 <button 
                   type="button" 
                   onClick={stop} 
-                  className="p-3 rounded-full bg-red-500/20 hover:bg-red-500/30 text-red-300 transition-colors flex items-center justify-center border border-red-500/30"
+                  className="p-2.5 rounded-full bg-white/10 text-white hover:bg-red-500/30 hover:text-red-300 transition-colors flex items-center justify-center"
                   title="Stop Generating"
                 >
                   <Square size={20} fill="currentColor" />
@@ -357,18 +362,18 @@ export default function Chat() {
                   type="button" 
                   onClick={(e) => handleFormSubmit(e)} 
                   disabled={!input.trim()}
-                  className={`p-3 rounded-full transition-all flex items-center justify-center ${
+                  className={`p-2.5 rounded-full transition-all flex items-center justify-center ${
                     input.trim() 
-                      ? 'bg-[var(--color-accent-purple)] hover:opacity-90 text-white shadow-[0_0_15px_rgba(147,51,234,0.4)]' 
-                      : 'bg-white/10 text-white/30 cursor-not-allowed'
+                      ? 'bg-gradient-to-br from-[var(--color-accent-purple)] to-[var(--color-accent-cyan)] text-white shadow-lg shadow-[var(--color-accent-purple)]/25 hover:scale-105' 
+                      : 'bg-white/5 text-white/20 cursor-not-allowed'
                   }`}
                   title="Send (Enter)"
                 >
-                  <Send size={20} className={input.trim() ? 'translate-x-0.5' : ''} />
+                  <Send size={18} className={input.trim() ? 'translate-x-0.5' : ''} />
                 </button>
               )}
             </div>
-          </GlassCard>
+          </div>
         </div>
 
       </div>
