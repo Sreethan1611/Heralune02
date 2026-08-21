@@ -14,6 +14,14 @@ const springTransition = {
   damping: 30,
 };
 
+const TypingIndicator = () => (
+  <div className={styles.typingIndicator}>
+    <span className={styles.typingDot}></span>
+    <span className={styles.typingDot}></span>
+    <span className={styles.typingDot}></span>
+  </div>
+);
+
 export default function Home() {
   const { messages, input, setInput, handleInputChange, append, setMessages, isLoading, stop } = useChat({
     api: "/api/chat",
@@ -141,13 +149,13 @@ export default function Home() {
           </motion.div>
         ) : (
           <AnimatePresence>
-            {messages.map((m) => (
+            {messages.filter(m => m.content.trim() !== '').map((m) => (
               <motion.div 
                 key={m.id} 
                 className={`${styles.messageRow} ${m.role === 'user' ? styles.userRow : styles.aiRow}`}
                 initial={{ opacity: 0, y: 20, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={springTransition}
+                transition={{ duration: 0.3, ease: "easeOut" }}
               >
                 <div className={`${styles.bubble} ${m.role === 'user' ? styles.userBubble : styles.aiBubble}`}>
                   {m.role === 'user' ? (
@@ -160,6 +168,18 @@ export default function Home() {
                 </div>
               </motion.div>
             ))}
+
+            {isLoading && (messages.length === 0 || messages[messages.length - 1]?.role === 'user' || messages[messages.length - 1]?.content === '') && (
+              <motion.div
+                key="typing-indicator"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className={`${styles.messageRow} ${styles.aiRow}`}
+              >
+                <TypingIndicator />
+              </motion.div>
+            )}
           </AnimatePresence>
         )}
         <div ref={messagesEndRef} />
