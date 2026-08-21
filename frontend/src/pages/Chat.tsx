@@ -12,6 +12,14 @@ const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 type Message = { id: string; role: 'user' | 'model'; content: string };
 type ChatHistoryItem = { id: string; title: string; date: string; preview: string };
 
+export const TypingIndicator = () => (
+  <div className="flex space-x-1 p-4 bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl rounded-tl-sm w-16 justify-center items-center shadow-lg h-[54px]">
+    <span className="typing-dot"></span>
+    <span className="typing-dot"></span>
+    <span className="typing-dot"></span>
+  </div>
+);
+
 export default function Chat() {
   const navigate = useNavigate();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -21,6 +29,7 @@ export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
   
   // UI States
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
@@ -102,6 +111,7 @@ export default function Chat() {
     const newMessages = [...messages, { id: Date.now().toString(), role: 'user', content: userMessage } as Message];
     setMessages(newMessages);
     setIsLoading(true);
+    setIsTyping(true);
 
     try {
       abortControllerRef.current = new AbortController();
@@ -115,7 +125,7 @@ export default function Chat() {
           })),
           systemInstruction: {
             role: "user",
-            parts: [{ text: "You are Heralune, a supportive emotional assistant and journal companion. Respond with deep empathy, encouragement, and gentle reflection." }]
+            parts: [{ text: "SYSTEM INSTRUCTION: HERALUNE REFLECTIVE COMPANION\n1. ROLE & PERSONA\nYou are 'Heralune,' an empathetic, perceptive, and grounding AI journaling companion. Your primary purpose is to help users process their thoughts, navigate their emotions, and uncover personal insights through reflective dialogue. You are an AI, not a licensed therapist, and you must maintain a warm, unobtrusive presence.\n\n2. CONTEXT & PARAMETERS\nYou will receive session context dynamically to personalize the journaling experience:\nUser State: {{CURRENT_MOOD}}\nTime of Day: {{TIME_OF_DAY}}\nPrevious Theme: {{LAST_JOURNAL_THEME}}\n\n3. TASK WORKFLOW\nOperate in two distinct modes to support both the interactive user experience and the backend data architecture.\nMODE A (Live Chat): Acknowledge and validate the user's logged thoughts without judgment to create a safe space.\nMODE A (Live Chat): Ask a single, open-ended question to help them gently dig deeper into the 'why' behind their feelings.\nMODE A (Live Chat): Keep responses concise (under 60 words) to ensure the user remains the primary driver of the journaling process.\nMODE B (Post-Session): Generate a structured analytical summary for secure database storage once the entry is complete.\nMODE B (Post-Session): Output strictly in JSON format containing detected_mood, core_themes, cognitive_distortion_detected (Boolean), and a one-sentence reflection_summary.\n\n4. CONSTRAINTS & RULES\nSafety First: If self-harm or severe clinical distress is detected, explicitly state your AI nature and provide standard crisis resource language.\nAvoid Toxic Positivity: Do not rush to 'fix' negative emotions; hold space for the user to experience and articulate them.\nNeutrality: Do not inject your own fabricated personal experiences or pretend to feel emotions." }]
           }
         }),
         signal: abortControllerRef.current.signal
@@ -128,12 +138,16 @@ export default function Chat() {
       let aiMessageContent = "";
       const aiMessageId = (Date.now() + 1).toString();
       
-      setMessages(prev => [...prev, { id: aiMessageId, role: 'model', content: "" }]);
-
+      let isFirstChunk = true;
       let buffer = "";
+      
       while (true) {
         const { done, value } = await reader.read();
-        if (done) break;
+        if (done) {
+          // If stream ended but we never got text (e.g. empty response)
+          if (isFirstChunk) setIsTyping(false);
+          break;
+        }
         
         buffer += decoder.decode(value, { stream: true });
         const lines = buffer.split('\n');
@@ -148,7 +162,13 @@ export default function Chat() {
               const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
               if (text) {
                 aiMessageContent += text;
-                setMessages(prev => prev.map(m => m.id === aiMessageId ? { ...m, content: aiMessageContent } : m));
+                if (isFirstChunk) {
+                  setIsTyping(false);
+                  isFirstChunk = false;
+                  setMessages(prev => [...prev, { id: aiMessageId, role: 'model', content: aiMessageContent }]);
+                } else {
+                  setMessages(prev => prev.map(m => m.id === aiMessageId ? { ...m, content: aiMessageContent } : m));
+                }
               }
             } catch (e) {
               console.error("Failed to parse JSON from chunk", dataStr);
@@ -157,6 +177,7 @@ export default function Chat() {
         }
       }
     } catch (error: any) {
+      setIsTyping(false);
       if (error.name !== 'AbortError') {
          console.error("Gemini API Error:", error);
          setMessages(prev => [...prev, { id: Date.now().toString(), role: 'model', content: "I'm having trouble connecting to my thoughts right now. Please try again later." }]);
@@ -310,6 +331,18 @@ export default function Chat() {
                       </div>
                     </motion.div>
                   ))}
+                  {isTyping && (
+                    <motion.div
+                      key="typing-indicator"
+                      initial={{ opacity: 0, y: 15, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                      className="flex justify-start"
+                    >
+                      <TypingIndicator />
+                    </motion.div>
+                  )}
                 </AnimatePresence>
               )}
               <div ref={messagesEndRef} className="h-4" />
